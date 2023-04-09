@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_supabase/pages/home_page.dart';
-import 'package:flutter_supabase/pages/start_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'pages/auth_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,38 +29,3 @@ class MainApp extends StatelessWidget {
   }
 }
 
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
-
-  @override
-  State<AuthPage> createState() => _AuthPageState();
-}
-
-class _AuthPageState extends State<AuthPage> {
-  final SupabaseClient supabase = Supabase.instance.client;
-  User? _user;
-
-  // To get current user : supabase.auth.currentUser
-
-  Future<void> _getAuth() async {
-    setState(() {
-      _user = supabase.auth.currentUser;
-    });
-    supabase.auth.onAuthStateChange.listen((event) {
-      setState(() {
-        _user = event.session?.user;
-      });
-    });
-  }
-
-  @override
-  void initState() {
-    _getAuth();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _user == null ? const StartPage() : const HomePage();
-  }
-}
