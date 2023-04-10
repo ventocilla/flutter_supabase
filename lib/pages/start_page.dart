@@ -10,11 +10,19 @@ class StartPage extends StatefulWidget {
 
 class _StartPageState extends State<StartPage> {
   final SupabaseClient supabase = Supabase.instance.client;
-  final _signInLoading = false;
-  final _signUpLoading = false;
+  var _signInLoading = false;
+  var _signUpLoading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  // Sign up supabase function
+  // supabase.auth.signup(email: '', password: '')
+  // This function will return User and Session
+  // --------------------------------------------
+  // Sign in supabase function
+  // supabase.auth.signInWithPassword(email: '', password: '')
+  // This function will return User and Session
 
   @override
   void dispose() {
@@ -72,11 +80,82 @@ class _StartPageState extends State<StartPage> {
                   ),
                   const SizedBox(height: 25),
 
-                  ElevatedButton(
-                      onPressed: () {}, child: const Text('Sign In')),
+                  _signInLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: () async {
+                            final isValid = _formKey.currentState?.validate();
+                            print('isValid: $isValid');
+                            if (isValid != true) {
+                              return;
+                            }
+                            setState(() {
+                              _signInLoading = true;
+                            });
+                            try {
+                              await supabase.auth.signInWithPassword(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              );
+                            } catch (e) {
+                              print('e: $e');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Sign in Failed'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              setState(() {
+                                _signInLoading = false;
+                              });
+                            }
+                          },
+                          child: const Text('Sign In')),
                   const Divider(),
-                  OutlinedButton(
-                      onPressed: () {}, child: const Text('Sign Out'))
+                  _signUpLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : OutlinedButton(
+                          onPressed: () async {
+                            final isValid = _formKey.currentState?.validate();
+                            print('isValid: $isValid');
+                            if (isValid != true) {
+                              return;
+                            }
+                            setState(() {
+                              _signUpLoading = true;
+                            });
+                            try {
+                              await supabase.auth.signUp(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text("Success! Confirmation Email Sent"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              setState(
+                                () {
+                                  _signUpLoading = false;
+                                },
+                              );
+                            } catch (e) {
+                              print('e: $e');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Sign up Failed'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              setState(() {
+                                _signUpLoading = false;
+                              });
+                            }
+                          },
+                          child: const Text('Sign Up'),
+                        )
                 ],
               ),
             ),
