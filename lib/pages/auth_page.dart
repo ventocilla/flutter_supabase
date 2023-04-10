@@ -36,6 +36,6 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _user == null ? const StartPage() : const HomePage();
+    return _user == null ? const StartPage() : HomePage();
   }
 }
