@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,11 +11,12 @@ class StartPage extends StatefulWidget {
 
 class _StartPageState extends State<StartPage> {
   final SupabaseClient supabase = Supabase.instance.client;
-  var _signInLoading = false;
-  var _signUpLoading = false;
+  bool _signInLoading = false;
+  bool _signUpLoading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _googleSignInLoading = false;
 
   // Sign up supabase function
   // supabase.auth.signup(email: '', password: '')
@@ -111,7 +113,7 @@ class _StartPageState extends State<StartPage> {
                             }
                           },
                           child: const Text('Sign In')),
-                  const Divider(),
+                  //const Divider(),
                   _signUpLoading
                       ? const Center(child: CircularProgressIndicator())
                       : OutlinedButton(
@@ -154,8 +156,58 @@ class _StartPageState extends State<StartPage> {
                               });
                             }
                           },
-                          child: const Text('Sign Up'),
+                          child: const Text('Sign Up')),
+
+                  Row(
+                    children: const [
+                      Expanded(
+                          child: Divider(
+                        thickness: 0.01,
+                      )),
+                      Padding(
+                        padding: EdgeInsets.all(15),
+                        child: Text('OR'),
+                      ),
+                      Expanded(
+                          child: Divider(
+                        thickness: 0.01,
+                      )),
+                    ],
+                  ),
+                  _googleSignInLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(),
                         )
+                      : OutlinedButton.icon(
+                          onPressed: () async {
+                            setState(() {
+                              _googleSignInLoading = true;
+                            });
+
+                            try {
+                              // syntax for Google Sign in
+                              await supabase.auth.signInWithOAuth(
+                                  Provider.google,
+                                  redirectTo: kIsWeb
+                                      ? null
+                                      : 'io.supabase.myflutterapp://login-callback');
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Sign Up Failed'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              setState(() {
+                                _googleSignInLoading = false;
+                              });
+                            }
+                          },
+                          icon: Image.network(
+                              'https://cdn-icons-png.flaticon.com/512/2504/2504739.png',
+                              height: 20),
+                          label: const Text('Continue with Google'),
+                        ),
                 ],
               ),
             ),
